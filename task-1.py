@@ -1,44 +1,29 @@
-from flask import Flask, jsonify, request
+def roman_to_integer(s: str) -> int:
+    # Mapping of Roman numerals to their integer values
+    roman_values = {
+        'I': 1,
+        'V': 5,
+        'X': 10,
+        'L': 50,
+        'C': 100,
+        'D': 500,
+        'M': 1000
+    }
 
-app = Flask(__name__)
+    total = 0
+    prev_value = 0
 
-# Фіктивні дані для прикладу
-data = [
-    {"id": 1, "name": "Item 1"},
-    {"id": 2, "name": "Item 2"}
-]
+    # Iterate through each character in the Roman numeral
+    for char in s:
+        current_value = roman_values[char]
 
-# GET (отримання даних)
-@app.route('/items', methods=['GET'])
-def get_items():
-    return jsonify(data)
+        # If the current value is greater than the previous value,
+        # it means we are in a subtractive situation
+        if current_value > prev_value:
+            total += current_value - 2 * prev_value  # Adjust for the previous addition
+        else:
+            total += current_value
 
-# POST (створення нового ресурсу)
-@app.route('/items', methods=['POST'])
-def create_item():
-    new_item = request.get_json()
-    data.append(new_item)
-    return jsonify(new_item), 201
+        prev_value = current_value
 
-# PUT (оновлення існуючого ресурсу)
-@app.route('/items/<int:id>', methods=['PUT'])
-def update_item(id):
-    item = next((item for item in data if item["id"] == id), None)
-    if item is None:
-        return jsonify({"error": "Item not found"}), 404
-
-    item.update(request.get_json())
-    return jsonify(item)
-
-# DELETE (видалення ресурсу)
-@app.route('/items/<int:id>', methods=['DELETE'])
-def delete_item(id):
-    item = next((item for item in data if item["id"] == id), None)
-    if item is None:
-        return jsonify({"error": "Item not found"}), 404
-
-    data.remove(item)
-    return jsonify({"message": "Item deleted"})
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    return total
